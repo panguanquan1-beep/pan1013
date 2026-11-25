@@ -1,0 +1,22 @@
+角色名防重名说明
+================
+
+根因
+----
+1. 取名页 xy298 虽有“这个名字太火爆了”的查询，但 all_zt.username 原是 TEXT 且无唯一索引，并发或绕过时仍可写入同名。
+2. 女性选性别时库字段误写 sex=1（与男性相同），仅 ini 里是 2，造成性别数据不一致。
+3. 存档目录 ache/<wjid> 按数字 id 分，不按名字；同名不会共用文件，但排行/聊天/交易展示同名会让人以为“数据串了”。若再叠加“只覆盖 src、未重导库、旧 ache 残留”，更容易乱。
+
+本次改动
+----
+- xy298：转义、GET_LOCK、写 username+name_uk，重名明确拒绝且不覆盖；女性 sex=2
+- xy329 改名：同样检查 name_uk，先改名成功再扣金豆
+- all_zt 增加 name_uk VARCHAR(64) NULL + UNIQUE；未取名为 NULL
+
+已混乱的同名号怎么处理
+----
+Adminer → hxxy → SQL：
+  SELECT username, COUNT(*) c, GROUP_CONCAT(wjid) ids
+  FROM all_zt WHERE username<>'' GROUP BY username HAVING c>1;
+保留一个 wjid，其它改名（或删号并删 fqxy/ache/<wjid>）。
+推荐：导入本包 game_database.sql 后注册新号测试，勿混用旧同名存档。
