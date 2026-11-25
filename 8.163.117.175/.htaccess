@@ -1,0 +1,9 @@
+# 禁止直接访问数据/缓存/配置文件（Apache 2.4）
+Options -Indexes
+<FilesMatch "\.(ini|bak|orig|txt|sql|log|md|bat|conf|MYD|MYI|frm|opt)$">
+    Require all denied
+</FilesMatch>
+RewriteEngine On
+# 允许本机 curl 打 yxCurl（兼容 /fqxy 与改名为 /fq）
+RewriteRule (^|/)sql/yxCurl\.php$ - [L]
+RewriteRule (^|/)(ache|acher|ip|config|sql|xxsql|ppp|class|ini|data|tools|lib|sql_schema|access_log|xxjy)(/|$) - [F,L]
