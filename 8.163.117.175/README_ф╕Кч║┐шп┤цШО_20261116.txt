@@ -1,0 +1,2 @@
+2026-11-16 上线包：代码覆盖 + SQL 073~087/089（088 为本地测试态，已排除）。
+部署步骤：解压覆盖站点根 -> chown www:www -> 访问 /_deploy.php?token=wsc1116sync&step=backup -> step=sql -> step=check -> 删除 _deploy.php 与 _deploy 目录。
