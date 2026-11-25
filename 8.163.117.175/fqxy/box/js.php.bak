@@ -1,0 +1,75 @@
+<?php
+/**
+ * 金银山 - 钻石顶（单次）
+ * 严格：每次只产出 1 条物品
+ * 数量=1 只显示名字，数量>1 显示 名字x数量
+ */
+
+// 初始化
+$manzu1 = "";
+$kcrl   = "";
+$wpdz1  = array();
+$wpdz2  = array();
+$wpdz3  = array();
+$wpdz4  = array();
+$wpdz5  = array();
+
+// ========== 权重表（总和 10000） ==========
+// [权重, 名字, 分类, 物品ID, 数量]
+$pool = array(
+    array(3500, '【强化精魄】',                 2, 1107, 20),
+    array(2000, '〖金龙宝箱〗',                 4, 1108, 10),
+    array(1000, '〖幸运宝石〗',                 2, 1109, 10),
+    array(1000, '〖三味真火〗',                 2, 1110, 1),
+    array(1500, '〖上古诛仙遗迹〗',             4, 1111, 2),
+    array( 300, '【强化精魄】',                 2, 1107, 70),
+    array( 300, '〖财气防具宝石召唤箱〗',       4, 1112, 8),
+    array( 200, '〖一亿银两包〗',               4, 1113, 6789),
+    array( 250, '〖圣灵石〗',                   4, 1114, 1),   // 1.25%*2 合并约 2.5%
+    array(  70, '〖八级魔化五爪金龙召唤箱〗',   8, 1115, 1),
+    array(  50, '〖五级财气防具宝石召唤箱〗',   4, 1116, 1),
+    array(  30, '〖九级魔化五爪金龙召唤箱〗',   8, 1117, 1),
+    array(  20, '〖十级魔化五爪金龙召唤箱〗',   8, 1118, 1),
+    array(  10, '〖帝王权杖〗',                 4, 1119, 1),
+    array(  10, '〖灵气固元心法〗',             4, 1120, 1),
+);
+
+// 抽一次
+$totalWeight = 0;
+foreach ($pool as $row) {
+    $totalWeight += $row[0];
+}
+$rand = mt_rand(1, $totalWeight);
+$cursor = 0;
+$hit = $pool[0];
+foreach ($pool as $row) {
+    $cursor += $row[0];
+    if ($rand <= $cursor) {
+        $hit = $row;
+        break;
+    }
+}
+
+// 只写入这一条
+$wpdz1[] = $hit[1];
+$wpdz2[] = $hit[2];
+$wpdz3[] = $hit[3];
+$wpdz4[] = $hit[4];
+$wpdz5[] = 1;
+
+// 发奖
+include("./rwmap/rwget.php");
+
+// 覆盖默认显示：数量为1不显示 x1
+// rwget 已经 echo 了带 x 的内容，这里重新友好显示一次更清晰
+// 若不想重复显示，可注释掉下面这段，并改 rwget.php（见第三节）
+/*
+$showName = $hit[1];
+$showNum  = intval($hit[4]);
+if ($showNum > 1) {
+    echo "<font color=black>获得：" . $showName . "x" . $showNum . "</font><br>";
+} else {
+    echo "<font color=black>获得：" . $showName . "</font><br>";
+}
+*/
+?>
