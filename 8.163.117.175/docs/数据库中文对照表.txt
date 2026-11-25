@@ -1,0 +1,158 @@
+数据库中文对照表（库：hxxy）
+用 Adminer 打开 hxxy 库，左边点表名 →「选择数据」看/改内容，「新建数据」加一行。
+没写到的列保持默认，不用管。
+
+==================================================
+一、item_def  物品定义（所有物品都在这）
+==================================================
+id            物品编号（新加可不填，自动生成；手动建议从 9400 往后）
+name          物品名。〖〗=可交易，【】=不可交易，括号要写进名字里
+color         名字颜色，如 red、#FFD700（金）、#ff9933（橙）；留空=默认色
+category_id   背包分类：1装备 2镶物 3药品 4任务 5其它 6书籍
+slot_id       装备部位（只有装备才填）：1兵器 2身穿 3头戴 4脚穿 5佩戴 6手饰
+              7法宝 8坐骑 9婚戒 10婚链 11徽章 12国家荣耀石 13阵营灵气石 14混元灵魂石
+trade_type    交易行分类：1消耗品 2兵器 3防具 4书籍 5兵器镶物 6防具镶物 7任务物品 8其它
+bind_type     绑定：0不绑定 1拾取绑定 2装备绑定
+description   物品说明（查看物品时显示的文字）
+level_req     使用/装备需要的等级
+weight        负重
+price         价格（银两）
+max_use       最多能用几次（留空=不限）
+batch_use     能否批量使用：1能 0不能
+can_drop      能否丢弃：1能 0不能
+can_sell      能否卖店：1能 0不能
+stackable     能否叠加：1能 0不能
+image         图片文件名（可不填）
+usable        能否使用：1能 0不能
+consume_on_use 用了是否消失：1消失 0不消失
+effect_type   使用效果类型（最重要）：
+                stat_bonus    永久加属性（配合 use_effect）
+                add_hp        同上，加属性
+                title         获得称号（配合 effect_value=称号编号）
+                return_town   回城（配合 effect_x、effect_y 坐标）
+                teleport_menu 打开腾云菜单
+                留空          不能使用
+use_effect    加什么属性、加多少，格式必须照抄：
+                {"hp": 100}
+                {"atk": 50, "def": 30}
+              可用的属性名：
+                hp生命  mp法力  atk攻击  def防御  matk魔攻
+                ind_atk独立攻击  ind_def独立防御
+                crit_rate暴击几率  crit_dmg爆伤增幅  dodge_rate闪避几率
+                hit_rate命中几率  crit_resist抗暴击率  lifesteal吸血
+effect_value  称号物品填称号编号（title_def 的 id）
+effect_x / effect_y  回城物品的目标坐标
+use_message   使用成功后显示的文字（可不填）
+enabled       1启用 0停用
+
+金银山 21 个奖品 = id 9301~9321，现在都是占位效果 {"hp": 100}，
+改它们的 use_effect 就行。
+
+==================================================
+二、title_def  称号定义
+==================================================
+id          称号编号
+name        称号名
+disp        显示样式（如 ☆N级☆至尊大富豪☆）
+color       称号颜色
+upgradeable 能否升级：1能（每用一次+1级、属性叠加） 0只能用一次
+attr        加哪种属性（属性名同上，如 hp）
+per_use     每用一次加多少（现在都是占位 1000）
+item_id     对应的称号物品编号
+
+==================================================
+三、jys_prize  金银山奖池
+==================================================
+pool     奖池：gold=金豆池  dia=钻石池
+seq      顺序号（同一奖池里不重复即可）
+item_id  奖品物品编号（item_def 的 id）
+qty      一次给几个
+weight   权重，越大越容易抽到
+
+==================================================
+四、player_item  玩家身上的物品
+==================================================
+player_id  角色ID（游戏里看到的 ID，如 10000001）
+item_id    物品编号
+location   位置：bag背包 warehouse仓库 equip已装备 listing交易行
+qty        数量
+enhance_lv 强化等级
+holes / max_holes  已打孔 / 最大孔数
+refine_lv  精炼等级
+locked     加锁：1锁 0不锁
+bound      已绑定：1是 0否
+
+==================================================
+五、player_title / player_stat_bonus
+==================================================
+player_title       玩家已有称号：player_id角色 title_id称号 level等级
+player_stat_bonus  玩家永久加成：player_id角色 attr_key属性名 value数值
+                   （想清掉某人的加成，删对应行即可）
+
+==================================================
+例子
+==================================================
+【例1】把〖金龙宝箱〗改成永久 +500攻击 +200防御：
+  item_def 找 id=9302，use_effect 改成 {"atk": 500, "def": 200}
+
+【例2】新加一个可交易的加血丹，用一次永久 +1000 生命，最多用 10 次：
+  item_def 新建数据，填：
+    name=〖回春丹〗  category_id=3  trade_type=1  description=使用后永久增加1000生命
+    usable=1  effect_type=stat_bonus  use_effect={"hp": 1000}  max_use=10
+  其它留默认，保存。
+
+【例3】把它放进金豆奖池：
+  jys_prize 新建：pool=gold  seq=8（不和已有重复）  item_id=刚才的编号  qty=1  weight=500
+
+【例4】直接给测试号发 5 个：
+  player_item 新建：player_id=角色ID  item_id=物品编号  location=bag  qty=5
+
+注意：改完不用重启，刷新游戏页面就生效。
+
+==================================================
+六、quest_def  任务定义（游戏里：任务 → 未接，或 NPC 身上接）
+==================================================
+id             任务编号（不填自动生成）
+kind           任务类型：支线 关键 副本 每日 赏金 阵营（活动 也能用，但只在“全部”里显示）
+               每日=每天可重复接；阵营=要先加入阵营
+name           任务名
+min_level      最低接取等级
+descr          任务描述（建议写成「NPC名：对话内容」）
+goal_type      目标类型：kill=杀怪  item=收集物品（交任务时扣掉）  talk=找某个NPC对话
+goal_ref       kill 填怪物编号（monster_def 表的 id）；item 填物品编号（item_def 的 id）
+               talk 填要对话的 NPC 编号（npc_def 表的 id），玩家点开那个 NPC 就算完成，并在那个 NPC 处交任务
+goal_qty       需要的数量
+reward_exp     奖励经验
+reward_silver  奖励银两
+reward_item    奖励物品编号（不给就留空）
+reward_item_qty 奖励物品数量
+next_id        后续任务编号：填了以后，这个任务做完，后续任务才会出现（做任务链用）
+giver_npc      发任务的 NPC 编号（npc_def 表的 id）：
+               填了 → 只能在这个 NPC 的对话页接（未接列表里显示「前往XX处接取」），
+                      杀怪/收集任务也回这个 NPC 处交，对话任务在目标 NPC 处交
+               留空 → 和以前一样，从「任务 → 未接」接，在任务详情里点完成
+
+怎么查 NPC 编号：打开 npc_def 表，按 name 搜（如 村长）。注意要用 id 列，不是 legacy_id。
+  名字重复时，到 map_npc 表看 dtx/dty（地图区号/格子号）确认是哪个地点的那个。
+  东海渔村常用：1390=村长 1391=强壮的渔夫 1392=张二娘 41=渔夫海生 37=小兰 35=大宝
+渔村现成的新手主线是 【quest_def 渔村主线/支线（025_yucun_real_quests.sql，对齐参考服）】
+1001 初见村长（none）
+1002 螃蟹泛滥（kill 螃蟹x4）
+1003 拜访强壮的渔夫（talk）
+1004 打猎心得（skill 挥砍）
+1005 调查洞穴（kill 洞穴蟹x4）
+1006 除掉大螃蟹（kill 【大螃蟹】x1）
+1007 前往长安城（none，发船票/信）
+1008 坐船去长安（item 船票，done_level=10）
+1009 送信给店小二（item 村长的信）
+1101 走丢的小海龟（支）
+1102 海生的蟹钳（支）
+1103 丢失的货物（支，未接菜单，升10级）
+头衔：MenpaiGate::$INIT_CHENGWEI + $RANK_OVERRIDES（等级/转职覆盖，后者 TBD）
+
+【例5】新加一个任务链：
+  第1个：kind=支线 giver_npc=1390(村长，不填就从任务菜单接) name=新手试炼二 min_level=5 descr=村长：去杀5只野兔吧
+         goal_type=kill goal_ref=野兔的怪物编号 goal_qty=5 reward_exp=1000 reward_silver=500
+  第2个：照样新建一个，记下它的 id
+  再回到第1个，把 next_id 填成第2个的 id。
+怪物编号去 monster_def 表按 name 找。
